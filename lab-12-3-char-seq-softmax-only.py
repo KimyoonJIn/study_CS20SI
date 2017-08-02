@@ -25,15 +25,27 @@ Y = tf.placeholder(tf.int32, [None, sequence_length])  # Y label
 # flatten the data (ignore batches for now). No effect if the batch size is 1
 X_one_hot = tf.one_hot(X, num_classes)  # one hot: 1 -> 0 1 0 0 0 0 0 0 0 0
 X_for_softmax = tf.reshape(X_one_hot, [-1, rnn_hidden_size])
+# print(X_for_softmax)
+# Tensor("Reshape:0", shape=(?, 10), dtype=float32)
 
 # softmax layer (rnn_hidden_size -> num_classes)
 softmax_w = tf.get_variable("softmax_w", [rnn_hidden_size, num_classes])
+#print(softmax_w)
+#<tf.Variable 'softmax_w:0' shape=(10, 10) dtype=float32_ref>
 softmax_b = tf.get_variable("softmax_b", [num_classes])
+# print(softmax_b)
+# <tf.Variable 'softmax_b:0' shape=(10,) dtype=float32_ref>
 outputs = tf.matmul(X_for_softmax, softmax_w) + softmax_b
+# print(outputs)
+# Tensor("add:0", shape=(?, 10), dtype=float32)
 
 # expend the data (revive the batches)
 outputs = tf.reshape(outputs, [batch_size, sequence_length, num_classes])
+# print(outputs)
+#Tensor("Reshape_1:0", shape=(1, 15, 10), dtype=float32)
 weights = tf.ones([batch_size, sequence_length])
+#print(weights      )
+#Tensor("ones:0", shape=(1, 15), dtype=float32)
 
 # Compute sequence cost/loss
 sequence_loss = tf.contrib.seq2seq.sequence_loss(

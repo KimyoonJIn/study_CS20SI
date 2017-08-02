@@ -5,7 +5,10 @@ tf.set_random_seed(777)  # reproducibility
 
 sample = " if you want you"
 idx2char = list(set(sample))  # index -> char
+#['t', 'o', 'w', 'f', 'n', 'y', 'a', 'i', ' ', 'u']
 char2idx = {c: i for i, c in enumerate(idx2char)}  # char -> idex
+#{'t': 0, 'o': 1, 'w': 2, 'f': 3, 'n': 4, 'y': 5, 'a': 6, 'i': 7, ' ': 8, 'u': 9}
+
 
 # hyper parameters
 dic_size = len(char2idx)  # RNN input size (one hot size)
@@ -16,6 +19,8 @@ sequence_length = len(sample) - 1  # number of lstm rollings (unit #)
 learning_rate = 0.1
 
 sample_idx = [char2idx[c] for c in sample]  # char to index
+#[2, 9, 0, 2, 4, 8, 5, 2, 1, 7, 3, 6, 2, 4, 8, 5] random하게 나옴
+#print(sample_idx)
 x_data = [sample_idx[:-1]]  # X data sample (0 ~ n-1) hello: hell
 y_data = [sample_idx[1:]]   # Y label sample (1 ~ n) hello: ello
 
@@ -31,11 +36,12 @@ outputs, _states = tf.nn.dynamic_rnn(
 
 # FC layer
 X_for_fc = tf.reshape(outputs, [-1, hidden_size])
+#print(X_for_fc) #(15,10)
 outputs = tf.contrib.layers.fully_connected(X_for_fc, num_classes, activation_fn=None)
-
+#print(outputs.shape) #(15,10)
 # reshape out for sequence_loss
 outputs = tf.reshape(outputs, [batch_size, sequence_length, num_classes])
-
+#print(outputs) #(1,15,10)
 weights = tf.ones([batch_size, sequence_length])
 sequence_loss = tf.contrib.seq2seq.sequence_loss(
     logits=outputs, targets=Y, weights=weights)
@@ -44,16 +50,16 @@ train = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)
 
 prediction = tf.argmax(outputs, axis=2)
 
-with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
-    for i in range(50):
-        l, _ = sess.run([loss, train], feed_dict={X: x_data, Y: y_data})
-        result = sess.run(prediction, feed_dict={X: x_data})
-
-        # print char using dic
-        result_str = [idx2char[c] for c in np.squeeze(result)]
-
-        print(i, "loss:", l, "Prediction:", ''.join(result_str))
+# with tf.Session() as sess:
+#     sess.run(tf.global_variables_initializer())
+#     for i in range(50):
+#         l, _ = sess.run([loss, train], feed_dict={X: x_data, Y: y_data})
+#         result = sess.run(prediction, feed_dict={X: x_data})
+#
+#         # print char using dic
+#         result_str = [idx2char[c] for c in np.squeeze(result)]
+#
+#         print(i, "loss:", l, "Prediction:", ''.join(result_str))
 
 
 '''
